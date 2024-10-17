@@ -17,19 +17,27 @@ public:
 		try {
 			if (database_connection.is_open()) {
 				std::cout << "Connected to database: " << database_connection.dbname() << '\n';
+				prepare_database_statements(database_connection);
 			}
 		}
 		catch (const std::exception& e) {
-			std::cerr << e.what() << '\n';
+			std::cerr << "Database error: " << e.what() << '\n';
 		}
 	}
-	void enter_new_customer(Customer& new_customer);
 
 	pqxx::connection& get_database_connection();
 
-	void prepare_insert(pqxx::connection& database_connection);
+	void enter_new_customer(Customer& new_customer);
+	bool verify_login(std::string& user_name, std::string& password);
 
-	void execute_insert(pqxx::transaction_base& transaction, std::string name, std::string age, std::string gender,
+	void prepare_insert_customer(pqxx::connection& database_connection);
+	void prepare_get_customer(pqxx::connection& database_connection);
+
+	void prepare_database_statements(pqxx::connection& db_conn);
+
+	void execute_insert_customer(pqxx::transaction_base& transaction, std::string name, std::string age, std::string gender,
 		std::string address, std::string social_security_number, std::string username, std::string password);
+
+	pqxx::result execute_get_customer(pqxx::transaction_base& transaction, std::string user_name, std::string password);
 };
 

@@ -12,24 +12,38 @@
 
 void UserInterface::login(Database& database) {
     std::cout << "Hello, welcome to The Bank of Ochoa!" << '\n';
-    std::cout << "Are you an existing customer? (1 for Yes and 0 for No)" << '\n';
+    std::cout << "Are you an existing customer? (1 for Yes and 0 for No): ";
 
     std::string user_input;
     std::getline(std::cin, user_input);
 
     if (user_input == "1") {
+
         std::string customer_email;
-        std::cout << "Email: ";
-        std::getline(std::cin, customer_email);
-
         std::string customer_password;
-        std::cout << "Password: ";
-        std::getline(std::cin, customer_password);
 
-        std::cout << "You have successfully logged in!\n";
+        do {
+
+            std::cout << "Email: ";
+            std::getline(std::cin, customer_email);
+
+            std::cout << "Password: ";
+            customer_password = get_sensitive_data();
+            std::cout << "\n";
+
+            // Connect to the database to ensure the customer exists
+            if (database.verify_login(customer_email, customer_password)) {
+                std::cout << "You have successfully logged in!\n";
+            }
+            else {
+                std::cout << "Invalid login credentials.\n";
+            }
+
+        } while (true);
+
     }
     else if (user_input == "0") {
-        std::cout << "Would you like to open an account? (1 for Yes and 0 for No)" << '\n';
+        std::cout << "Would you like to open an account? (1 for Yes and 0 for No): ";
 
         std::getline(std::cin, user_input);
         if (user_input == "1") {
@@ -54,9 +68,7 @@ void UserInterface::signup(Database& database) {
     new_customer.update_username(username);
 
     std::cout << "Enter password: ";
-    std::string password;
-    std::getline(std::cin, password);
-    new_customer.update_password(password);
+    new_customer.update_password(get_sensitive_data());
 
     std::cout << "Name: ";
     std::string name;
@@ -83,20 +95,14 @@ void UserInterface::signup(Database& database) {
 
     database.enter_new_customer(new_customer);
 
-    std::cout << "\nEnter the number(s) of the account(s) that you would you like to open.\n";
-    std::cout << "(1) Checking\n";
-    std::cout << "(2) Savings\n";
     std::string type_of_account;
+    std::cout << "Would you like to open a checking account? (1 for Yes or 0 for NO): ";
+    std::getline(std::cin, type_of_account);
 
-    std::vector<std::string> tokens;
-    while (std::getline(std::cin, type_of_account, ' ')) {
-        tokens.push_back(type_of_account);
-    }
+    std::cout << "Would you like to open a savings account? (1 for Yes or 0 for NO): ";
+    std::getline(std::cin, type_of_account);
 
-    if (tokens.size() == 2) {
-        std::cout << "You have opened a checking and savings account\n";
-    }
-
+    std::cout << "Congrats! You have successfully created an account!";
 }
 
 std::string UserInterface::get_sensitive_data() {
