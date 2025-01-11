@@ -27,17 +27,37 @@ public:
 
 	pqxx::connection& get_database_connection();
 
+	/*
+	* Enter a new customer into the Database.
+	*/
 	void enter_new_customer(Customer& new_customer);
-	bool verify_login(std::string& user_name, std::string& password);
 
+	/*
+	* Verify that user credentials are valid.
+	*/
+	Customer verify_login(std::string& user_name, std::string& password);
+
+	/*
+	* SQL query to insert a customer into the database.
+	*/
 	void prepare_insert_customer(pqxx::connection& database_connection);
+
+	/*
+	* SQL query to verify whether a customer exists in the database.
+	*/
 	void prepare_get_customer(pqxx::connection& database_connection);
 
+	/*
+	* Statements are prepared once per connection. Once a statement is prepared, it remains prepared for the lifetime of the
+	* connection or until explicitly deallocated.
+	*/
 	void prepare_database_statements(pqxx::connection& db_conn);
 
 	void execute_insert_customer(pqxx::transaction_base& transaction, std::string name, std::string age, std::string gender,
 		std::string address, std::string social_security_number, std::string username, std::string password);
 
 	pqxx::result execute_get_customer(pqxx::transaction_base& transaction, std::string user_name, std::string password);
+
+	std::vector<unsigned char> generate_salt();
 };
 

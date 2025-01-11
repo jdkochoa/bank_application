@@ -22,6 +22,11 @@ public:
         social_security_number(social_security),
         gender(gender)
     {};
+
+	explicit operator bool() const {
+		return !name.empty();
+	}
+
     void update_username(std::string username);
     void update_password(std::string password);
     void update_name(std::string name);

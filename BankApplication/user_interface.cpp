@@ -22,8 +22,8 @@ void UserInterface::login(Database& database) {
         std::string customer_email;
         std::string customer_password;
 
+		Customer customer;
         do {
-
             std::cout << "Email: ";
             std::getline(std::cin, customer_email);
 
@@ -31,15 +31,17 @@ void UserInterface::login(Database& database) {
             customer_password = get_sensitive_data();
             std::cout << "\n";
 
-            // Connect to the database to ensure the customer exists
-            if (database.verify_login(customer_email, customer_password)) {
-                std::cout << "You have successfully logged in!\n";
+            // Verify that the credentials are valid and that the customer exists.
+            customer = database.verify_login(customer_email, customer_password);
+            if (customer) {
+                menu(customer);
             }
             else {
                 std::cout << "Invalid login credentials.\n";
+                // TODO: Main page that displays the users account information.
             }
 
-        } while (true);
+        } while (!customer);
 
     }
     else if (user_input == "0") {
@@ -140,4 +142,19 @@ void UserInterface::get_password_and_ssn() {
   
     std::cout << "Enter Social Security Number: ";
     std::string social_security_number = get_sensitive_data();
+}
+
+void UserInterface::menu(Customer& customer) {
+    std::cout << "\n=========================================================================\n";
+	std::cout << '\n';
+    std::cout << "Hi, " << customer.get_name() << "\n";
+
+    std::cout << "Balance: $\n";
+    std::cout << '\n';
+	std::cout << "What would you like to do today?:\n";
+	std::cout << "1. Deposit\n";
+	std::cout << "2. Withdraw\n";
+	std::cout << "3. Exit\n";
+	std::cout << '\n';
+	std::cout << "=========================================================================\n";
 }

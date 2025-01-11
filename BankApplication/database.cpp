@@ -8,22 +8,30 @@ pqxx::connection& Database::get_database_connection() {
     return this->database_connection;
 }
 
-bool Database::verify_login(std::string& username, std::string& password) {
+Customer Database::verify_login(std::string& username, std::string& password) {
 
     try {
-
         pqxx::connection& db_conn = get_database_connection();
-        pqxx::read_transaction RT(db_conn);
+        // Read-only transaction 
+        pqxx::read_transaction RT(db_conn); 
         pqxx::result query_result = execute_get_customer(RT, username, password);
 
-        return !query_result.empty();
+        Customer customer;
+        if (!query_result.empty()) {
+            pqxx::row row = query_result[0];
+            customer = Customer();
+			customer.update_name(row["name"].c_str());
+        }
+
+        return customer;
     }
     catch (std::exception const& e) {
         std::cout << "Database error: " << e.what() << '\n';
-        return false;
     }
+
 }
 
+// Enter new customer into the database
 void Database::enter_new_customer(Customer& new_customer) {
 
     pqxx::connection& db_conn = get_database_connection();
@@ -42,9 +50,7 @@ void Database::enter_new_customer(Customer& new_customer) {
     W.commit();
 }
 
-/*
-* Inserts a new customer into the database
-*/
+// Prepare SQL query to insert a customer into the database
 void Database::prepare_insert_customer(pqxx::connection& database_connection) {
     database_connection.prepare(
         "insert",
@@ -52,9 +58,7 @@ void Database::prepare_insert_customer(pqxx::connection& database_connection) {
     );
 }
 
-/*
-* Retrieves a customer from the database
-*/
+// Prepare SQL query to verify whether a customer exists in the database
 void Database::prepare_get_customer(pqxx::connection& database_connection) {
     database_connection.prepare(
         "get",
@@ -62,6 +66,7 @@ void Database::prepare_get_customer(pqxx::connection& database_connection) {
     );
 }
 
+// Statements are prepared once per connection. Once a statement is prepared, it remains prepared for the lifetime of the connection.
 void Database::prepare_database_statements(pqxx::connection& db_conn) {
     prepare_get_customer(db_conn);
     prepare_insert_customer(db_conn);
@@ -82,3 +87,4 @@ pqxx::result Database::execute_get_customer(pqxx::transaction_base& transaction,
     return transaction.exec_prepared("get", user_name, password);
 }
 
+std::vector<unsigned char> generate_salt(std::vector<unsigned char>& vector);
